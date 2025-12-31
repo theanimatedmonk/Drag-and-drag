@@ -1,0 +1,222 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #3a3a3c;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(5, auto);
+    gap: 20px;
+    padding: 30px 25px;
+    background: linear-gradient(
+        145deg,
+        rgba(169, 189, 199, 0.95) 0%,
+        rgba(134, 175, 180, 0.95) 30%,
+        rgba(108, 158, 165, 0.95) 50%,
+        rgba(152, 169, 190, 0.95) 80%,
+        rgba(175, 165, 185, 0.95) 100%
+    );
+    border-radius: 40px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decorative background */
+.grid-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(ellipse 80% 50% at 30% 40%, rgba(100, 150, 160, 0.6) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 70% 70%, rgba(140, 130, 160, 0.4) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.icon-slot {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    cursor: grab;
+    position: relative;
+    z-index: 1;
+    touch-action: none;
+}
+
+.icon-slot:active {
+    cursor: grabbing;
+}
+
+/* Empty slots */
+.empty-slot {
+    cursor: default;
+}
+
+.empty-slot .empty-wrapper {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    opacity: 0;
+}
+
+.empty-slot:hover .empty-wrapper {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.icon-wrapper {
+    width: 70px;
+    height: 70px;
+    border-radius: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    overflow: hidden;
+}
+
+.icon-wrapper img {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    border-radius: 12px;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.icon-slot:hover .icon-wrapper {
+    transform: scale(1.05);
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.15),
+        0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.icon-name {
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* SortableJS States */
+
+/* Ghost - the placeholder that shows where item will be dropped */
+.sortable-ghost {
+    opacity: 1;
+}
+
+.sortable-ghost .icon-wrapper {
+    background: hsla(0, 0%, 100%, 0.3);
+    border: 1.5px solid #ffffff;
+    box-shadow: none;
+}
+
+.sortable-ghost .icon-wrapper img {
+    opacity: 0;
+}
+
+.sortable-ghost .icon-name {
+    opacity: 0;
+}
+
+/* Chosen - the original item being dragged (hidden) */
+.sortable-chosen {
+    opacity: 1;
+}
+
+/* Drag - the floating copy being dragged */
+.sortable-drag {
+    opacity: 1 !important;
+    transform: scale(1.1);
+    z-index: 1000;
+}
+
+.sortable-drag .icon-wrapper {
+    transform: scale(1);
+    box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.3),
+        0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.sortable-drag .icon-wrapper img {
+    opacity: 1 !important;
+}
+
+.sortable-drag .icon-name {
+    display: none;
+}
+
+/* Folder style (for future grouped icons) */
+.folder-wrapper {
+    width: 70px;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 16px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 3px;
+    padding: 8px;
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.12),
+        0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.folder-wrapper .mini-icon {
+    width: 100%;
+    height: 100%;
+    border-radius: 6px;
+    object-fit: contain;
+}
+
+/* Indicator dots overlay - fixed position, doesn't move with items */
+.dots-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.dots-overlay.visible {
+    opacity: 1;
+}
+
+.indicator-dot {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+}
