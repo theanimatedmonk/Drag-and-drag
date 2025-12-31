@@ -29,6 +29,104 @@ const ROWS = 5;
 let grid = [];
 let dotsOverlay = null;
 
+// ============== SOUND EFFECTS ==============
+
+// Sound configuration - replace with your own sound files
+const SOUNDS = {
+    swap: 'sounds/swap.mp3',    // Sound X: when slots swap positions
+    drop: 'sounds/drop.mp3'     // Sound Y: when icon is finally placed
+};
+
+// Audio context for generating sounds (fallback if no sound files)
+let audioContext = null;
+
+// Preloaded audio elements
+let swapSound = null;
+let dropSound = null;
+
+// Initialize sounds
+function initSounds() {
+    // Try to load sound files
+    swapSound = new Audio(SOUNDS.swap);
+    dropSound = new Audio(SOUNDS.drop);
+    
+    // Preload
+    swapSound.load();
+    dropSound.load();
+    
+    // Set volumes
+    swapSound.volume = 0.3;
+    dropSound.volume = 0.5;
+    
+    // Initialize Web Audio API as fallback
+    try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (e) {
+        console.log('Web Audio API not supported');
+    }
+}
+
+// Play swap sound (Sound X) - short tick/pop sound
+function playSwapSound() {
+    // Try to play the audio file first
+    if (swapSound && swapSound.readyState >= 2) {
+        swapSound.currentTime = 0;
+        swapSound.play().catch(() => {});
+        return;
+    }
+    
+    // Fallback: generate a short tick sound
+    if (!audioContext) return;
+    
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+    gainNode.gain.exponentialDecayTo = 0.01;
+    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.05);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.05);
+}
+
+// Play drop sound (Sound Y) - satisfying placement sound
+function playDropSound() {
+    // Try to play the audio file first
+    if (dropSound && dropSound.readyState >= 2) {
+        dropSound.currentTime = 0;
+        dropSound.play().catch(() => {});
+        return;
+    }
+    
+    // Fallback: generate a drop/thud sound
+    if (!audioContext) return;
+    
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.1);
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.15);
+}
+
+// ============== END SOUND EFFECTS ==============
+
 // Initialize grid with icons in first slots, rest empty
 function initGrid() {
     grid = [];
@@ -183,9 +281,15 @@ function initSortable() {
             showDots();
         },
         
-        // When drag ends - hide dots and sync state
+        // When items swap/change position during drag
+        onChange: function(evt) {
+            playSwapSound();
+        },
+        
+        // When drag ends - hide dots, play drop sound, sync state
         onEnd: function(evt) {
             hideDots();
+            playDropSound();
             syncGridWithDOM();
         }
     });
@@ -193,7 +297,8 @@ function initSortable() {
 
 // Initialize
 initGrid();
+initSounds();
 renderGrid();
 initSortable();
 
-console.log('Drag & Drop initialized with SortableJS');
+console.log('Drag & Drop initialized with SortableJS + Sound Effects');
