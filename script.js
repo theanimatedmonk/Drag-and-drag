@@ -33,8 +33,8 @@ let dotsOverlay = null;
 
 // Sound configuration - replace with your own sound files
 const SOUNDS = {
-    swap: 'sounds/swap.mp3',    // Sound X: when slots swap positions
-    drop: 'sounds/drop.mp3'     // Sound Y: when icon is finally placed
+    swap: 'sounds/swap-1.mp3',    // Sound X: when slots swap positions
+    drop: 'sounds/drop-1.mp3'     // Sound Y: when icon is finally placed
 };
 
 // Audio context for generating sounds (fallback if no sound files)
